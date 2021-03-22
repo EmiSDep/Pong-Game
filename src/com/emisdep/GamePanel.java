@@ -13,6 +13,7 @@ public class GamePanel extends JPanel implements Runnable{
     static final int BALL_DIAMETER = 20;
     static final int PADDLE_WIDTH = 25;
     static final int PADDLE_HEIGHT = 100;
+    boolean gameStarted;
     Thread gameThread;
     Image image;
     Graphics graphics;
@@ -30,6 +31,7 @@ public class GamePanel extends JPanel implements Runnable{
         this.addKeyListener(new AL());
         this.setPreferredSize(SCREEN_SIZE);
 
+        gameStarted = false;
         gameThread = new Thread(this);
         gameThread.start();
     }
@@ -47,6 +49,10 @@ public class GamePanel extends JPanel implements Runnable{
         graphics = image.getGraphics();
         draw(graphics);
         g.drawImage(image,0,0,this);
+        if (!gameStarted) {
+            g.setColor(Color.white);
+            g.drawString("Press Enter to Begin...", 310, 130);
+        }
     }
     public void draw(Graphics g) {
         paddle1.draw(g);
@@ -57,9 +63,11 @@ public class GamePanel extends JPanel implements Runnable{
 
     }
     public void move() {
-        paddle1.move();
-        paddle2.move();
-        ball.move();
+        if (gameStarted) {
+            paddle1.move();
+            paddle2.move();
+            ball.move();
+        }
     }
     public void checkCollision() {
 
@@ -116,24 +124,27 @@ public class GamePanel extends JPanel implements Runnable{
     }
     public void run() {
         //game loop
-        long lastTime = System.nanoTime();
-        double amountOfTicks =60.0;
-        double ns = 1000000000 / amountOfTicks;
-        double delta = 0;
-        while(true) {
-            long now = System.nanoTime();
-            delta += (now -lastTime)/ns;
-            lastTime = now;
-            if(delta >=1) {
-                move();
-                checkCollision();
-                repaint();
-                delta--;
+            long lastTime = System.nanoTime();
+            double amountOfTicks = 60.0;
+            double ns = 1000000000 / amountOfTicks;
+            double delta = 0;
+            while (true) {
+                long now = System.nanoTime();
+                delta += (now - lastTime) / ns;
+                lastTime = now;
+                if (delta >= 1) {
+                    move();
+                    checkCollision();
+                    repaint();
+                    delta--;
+                }
             }
-        }
     }
     public class AL extends KeyAdapter{
         public void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                gameStarted = true;
+            }
             paddle1.keyPressed(e);
             paddle2.keyPressed(e);
         }
